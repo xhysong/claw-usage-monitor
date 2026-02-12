@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# SQLite / data
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Node / Tauri
+node_modules/
+dist/
+macapp/claw-monitor/src-tauri/target/
+
+# Editor
+.vscode/
+.idea/

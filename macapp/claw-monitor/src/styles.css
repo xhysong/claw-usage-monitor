@@ -1,0 +1,98 @@
+:root {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  margin: 0;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.muted {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.k {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.55);
+  margin-bottom: 6px;
+}
+
+.v {
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.v2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.v3 {
+  font-size: 13px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.s {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #171717;
+  }
+  .muted {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .card {
+    background: rgba(24, 24, 24, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .k {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .s {
+    color: rgba(255, 255, 255, 0.65);
+  }
+}
