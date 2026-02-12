@@ -41,6 +41,56 @@ npm install
 npm run tauri dev
 ```
 
+## LaunchAgent (optional)
+
+If you want the collector to run in the background on login, create a LaunchAgent.
+
+1) Create `~/Library/LaunchAgents/ai.openclaw.claw-monitor.collector.plist`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>ai.openclaw.claw-monitor.collector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>REPLACE_WITH_REPO_PATH/collector/collect.py</string>
+    <string>--db</string><string>$HOME/.openclaw/workspace/projects/openclaw-usage-monitor/collector/usage.db</string>
+    <string>--interval</string><string>1.0</string>
+    <string>--keep-days</string><string>90</string>
+    <string>--profile</string><string>openclaw</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StandardOutPath</key><string>$HOME/Library/Logs/ClawMonitor/collector.out.log</string>
+  <key>StandardErrorPath</key><string>$HOME/Library/Logs/ClawMonitor/collector.err.log</string>
+</dict>
+</plist>
+```
+
+2) Load + start it:
+
+```bash
+mkdir -p "$HOME/Library/Logs/ClawMonitor"
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.openclaw.claw-monitor.collector.plist
+launchctl kickstart -k gui/$(id -u)/ai.openclaw.claw-monitor.collector
+```
+
+3) Troubleshooting:
+
+```bash
+launchctl print gui/$(id -u)/ai.openclaw.claw-monitor.collector
+tail -n 200 "$HOME/Library/Logs/ClawMonitor/collector.err.log"
+```
+
+Tip: launchd has a minimal environment. If the collector can't find `openclaw`, set `OPENCLAW_BIN=/opt/homebrew/bin/openclaw` in the plist.
+
 ## Notes / limitations
 
 - Token metrics come from `openclaw status --json` (session snapshots). They typically update after a turn completes.
