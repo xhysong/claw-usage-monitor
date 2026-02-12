@@ -69,8 +69,9 @@ class StatusSample:
 
 
 def get_openclaw_status_json() -> Dict[str, Any]:
-    # `openclaw status --json` can be slow under load; give it more time.
-    out = run([OPENCLAW_BIN, "status", "--json"], timeout=25)
+    # We sample at 1s, so `status` must be bounded.
+    # `openclaw status` supports a probe timeout; keep both that and the subprocess timeout tight.
+    out = run([OPENCLAW_BIN, "status", "--json", "--timeout", "5000"], timeout=7)
     return json.loads(out)
 
 
@@ -86,15 +87,44 @@ def pick_primary_session(status: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
 def parse_status_sample(status: Dict[str, Any]) -> StatusSample:
     s = pick_primary_session(status) or {}
+
+    in_t = s.get("inputTokens")
+    out_t = s.get("outputTokens")
+    ctx_t = s.get("contextTokens")
+
+    # Some OpenClaw builds may report session `totalTokens` as the *context window size*
+    # (e.g. 400000) with remaining=0/percentUsed=100, which breaks rate/rollup logic.
+    # For monitoring, it's safer to treat total = input + output when available.
+    total_t = None
+    if isinstance(in_t, int) and isinstance(out_t, int):
+        total_t = in_t + out_t
+    else:
+        tt = s.get("totalTokens")
+        total_t = tt if isinstance(tt, int) else None
+
+    remaining_t = None
+    if isinstance(ctx_t, int) and isinstance(total_t, int):
+        remaining_t = max(0, ctx_t - total_t)
+    else:
+        rt = s.get("remainingTokens")
+        remaining_t = rt if isinstance(rt, int) else None
+
+    pct = s.get("percentUsed")
+    percent_used = None
+    if isinstance(ctx_t, int) and isinstance(total_t, int) and ctx_t > 0:
+        percent_used = int(round(100.0 * total_t / ctx_t))
+    elif isinstance(pct, int):
+        percent_used = pct
+
     return StatusSample(
         session_key=s.get("key"),
         model=s.get("model"),
-        input_tokens=s.get("inputTokens"),
-        output_tokens=s.get("outputTokens"),
-        total_tokens=s.get("totalTokens"),
-        remaining_tokens=s.get("remainingTokens"),
-        context_tokens=s.get("contextTokens"),
-        percent_used=s.get("percentUsed"),
+        input_tokens=in_t if isinstance(in_t, int) else None,
+        output_tokens=out_t if isinstance(out_t, int) else None,
+        total_tokens=total_t,
+        remaining_tokens=remaining_t,
+        context_tokens=ctx_t if isinstance(ctx_t, int) else None,
+        percent_used=percent_used,
     )
 
 
