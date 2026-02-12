@@ -114,7 +114,11 @@ fn get_window_delta(conn: &Connection, start_ms: i64, end_ms: i64) -> Result<Rol
     let (ts1, in1, out1, tot1, rx1, tx1) = last;
 
     let delta = |a: Option<i64>, b: Option<i64>| match (a, b) {
-        (Some(x), Some(y)) => Some(y - x),
+        (Some(x), Some(y)) => {
+            // Counters can reset (new session, compaction, truncation). Negative deltas are not meaningful for usage.
+            let d = y - x;
+            if d >= 0 { Some(d) } else { None }
+        }
         _ => None,
     };
 
@@ -241,19 +245,30 @@ fn get_live_metrics(db_path: Option<String>) -> Result<LiveMetrics, String> {
             let dt_s = (ts1 - ts0) as f64 / 1000.0;
             if dt_s > 0.0 {
                 if let (Some(a), Some(b)) = (tot1, tot0) {
-                    tokens_per_s = Some((a - b) as f64 / dt_s);
+                    let d = a - b;
+                    if d >= 0 {
+                        tokens_per_s = Some(d as f64 / dt_s);
+                    }
                 }
                 if let (Some(a), Some(b)) = (in1, in0) {
-                    in_tokens_per_s = Some((a - b) as f64 / dt_s);
+                    let d = a - b;
+                    if d >= 0 {
+                        in_tokens_per_s = Some(d as f64 / dt_s);
+                    }
                 }
                 if let (Some(a), Some(b)) = (out1, out0) {
-                    out_tokens_per_s = Some((a - b) as f64 / dt_s);
+                    let d = a - b;
+                    if d >= 0 {
+                        out_tokens_per_s = Some(d as f64 / dt_s);
+                    }
                 }
                 if let (Some(a), Some(b)) = (rx1, rx0) {
-                    net_rx_bytes_per_s = Some((a - b) as f64 / dt_s);
+                    let d = a - b;
+                    net_rx_bytes_per_s = Some(d as f64 / dt_s);
                 }
                 if let (Some(a), Some(b)) = (tx1, tx0) {
-                    net_tx_bytes_per_s = Some((a - b) as f64 / dt_s);
+                    let d = a - b;
+                    net_tx_bytes_per_s = Some(d as f64 / dt_s);
                 }
             }
         }
