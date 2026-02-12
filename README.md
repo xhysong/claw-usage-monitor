@@ -93,5 +93,8 @@ Tip: launchd has a minimal environment. If the collector can't find `openclaw`, 
 
 ## Notes / limitations
 
-- Token metrics come from `openclaw status --json` (session snapshots). They typically update after a turn completes.
-- `nettop` per-PID stats may require permissions and can vary across macOS versions.
+- **Token metrics are snapshots.** They come from `openclaw status --json` (session snapshots), which typically update after a turn completes.
+- **Token rate is derived.** `tok/s` is computed from deltas between successive samples for the same session.
+- **Not true streaming usage.** If you want per-chunk/streaming usage while a response is still generating, you need a different data source (e.g., listening to gateway response lifecycle events / SSE and extracting `usage` when reported).
+- **launchd environment is minimal.** Background LaunchAgents often cannot find `openclaw`/`node` unless you set `PATH` (and sometimes `OPENCLAW_BIN`).
+- **Network stats are best-effort.** `nettop` per-PID stats may require permissions and can vary across macOS versions; the collector falls back to `netstat -ib` totals when needed.
